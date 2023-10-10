@@ -49,7 +49,7 @@ public class HinhAnhDuAn implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "MaHinhDuAn")
     private Integer maHinhDuAn;
-    @Size(max = 150)
+    @Size(max = 200)
     @Column(name = "DuongDanHinh")
     private String duongDanHinh;
     @Column(name = "NgayTao")

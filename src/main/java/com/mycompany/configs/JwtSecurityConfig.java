@@ -77,6 +77,10 @@ public class JwtSecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().antMatchers("/api/post/").permitAll();
         http.authorizeRequests().antMatchers("/api/post/{id}/").permitAll();
         http.authorizeRequests().antMatchers("/api/post/count-pages/").permitAll();
+        http.authorizeRequests().antMatchers("/api/charity-project/").permitAll();
+        http.authorizeRequests().antMatchers("/api/charity-project/{id}/").permitAll();
+        http.authorizeRequests().antMatchers("/api/charity-project/count-pages/").permitAll();
+        http.authorizeRequests().antMatchers("/api/join-project/{id}/").permitAll();
         http.antMatcher("/api/**").httpBasic().authenticationEntryPoint(restServicesEntryPoint()).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authorizeRequests()
                 .antMatchers(HttpMethod.GET, "/api/**").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_MEMBER') or hasRole('ROLE_CUSTOMER')")

@@ -41,14 +41,14 @@ import org.springframework.web.multipart.MultipartFile;
 @NamedQueries({
     @NamedQuery(name = "DuAnTuThien.findAll", query = "SELECT d FROM DuAnTuThien d")})
 public class DuAnTuThien implements Serializable {
-@PrePersist
-    protected void onCreate(){
-        this.ngayTao=new Date(System.currentTimeMillis());
+    @PrePersist
+    protected void onCreate() {
+        this.ngayTao = new Date(System.currentTimeMillis());
     }
 
     @PreUpdate
-    protected void onUpdate(){
-        this.ngayCapNhat=new Date(System.currentTimeMillis());
+    protected void onUpdate() {
+        this.ngayCapNhat = new Date(System.currentTimeMillis());
     }
     @Column(name = "DaDuyet")
     private Short daDuyet;

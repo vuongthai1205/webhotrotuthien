@@ -290,7 +290,12 @@ public class ApiBaiVietController {
         postResponseDTO.setImagesPost(imagePostDTOs);
         postResponseDTO.setCreateAt(post.getNgayTao());
         postResponseDTO.setUpdateAt(post.getNgayCapNhat());
-
+        if (post.getThoiGianBatDau()!=null) {
+            postResponseDTO.setStartAuctionTime(F.format(post.getThoiGianBatDau()));
+        }
+        if (post.getThoiGianKetThuc()!=null) {
+            postResponseDTO.setEndAuctionTime(F.format(post.getThoiGianKetThuc()));
+        }
         postResponseDTO.setAuctionStatus(auctionStatusDTO);
         postResponseDTO.setLikePost(likePostDTOs);
         userResponseDTO.setUsername(post.getMaThanhVien().getTenDangNhap());

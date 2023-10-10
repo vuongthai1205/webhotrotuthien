@@ -8,11 +8,8 @@ import com.mycompany.DTO.CharityProjectRequestDTO;
 import com.mycompany.DTO.CharityProjectResponseDTO;
 import com.mycompany.DTO.ImagePostDTO;
 import com.mycompany.DTO.LinkImageDTO;
-import com.mycompany.DTO.PostResponseDTO;
 import com.mycompany.DTO.UserResponseDTO;
-import static com.mycompany.controllers.ApiBaiVietController.F;
 import com.mycompany.pojo.DuAnTuThien;
-import com.mycompany.pojo.HinhAnhBaiViet;
 import com.mycompany.pojo.HinhAnhDuAn;
 import com.mycompany.pojo.ThanhVien;
 import com.mycompany.service.DuAnTuThienService;
@@ -28,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -66,6 +64,7 @@ public class ApiDuAnTuThienController {
             charityProjectResponseDTO.setNameProject(duAnTuThien.getTenDuAn());
             charityProjectResponseDTO.setPurpose(duAnTuThien.getMucDich());
             charityProjectResponseDTO.setAddress(duAnTuThien.getDiaDiem());
+            charityProjectResponseDTO.setAmountRaised(duAnTuThien.getSoTienHuyDong());
             if (duAnTuThien.getThoiGianBatDau() != null) {
                 charityProjectResponseDTO.setStartTime(F.format(duAnTuThien.getThoiGianBatDau()));
             }
@@ -142,7 +141,7 @@ public class ApiDuAnTuThienController {
         ThanhVien u = this.userService.getUserByUsername(user.getName());
         DuAnTuThien duAnTuThien = this.duAnTuThienService.getDuAnTuThienById(id);
         if (duAnTuThien.getMaThanhVienTaoDA().equals(u)) {
-            List<HinhAnhDuAn> hinhAnhDuAns  = this.hinhAnhDuAnService.listHinhAnh(duAnTuThien);
+            List<HinhAnhDuAn> hinhAnhDuAns = this.hinhAnhDuAnService.listHinhAnh(duAnTuThien);
             hinhAnhDuAns.forEach(i -> {
                 this.hinhAnhDuAnService.deleteImage(i);
             });
@@ -164,7 +163,7 @@ public class ApiDuAnTuThienController {
             duAnTuThien.setThoiGianBatDau(charityProjectRequestDTO.getStartTime());
             duAnTuThien.setThoiGianKetThuc(charityProjectRequestDTO.getEndTime());
             if (this.duAnTuThienService.addOrUpdateCharityProject(duAnTuThien)) {
-                return ResponseEntity.status(HttpStatus.CREATED).body("Project added or updated successfully");
+                return ResponseEntity.status(HttpStatus.OK).body("Project added or updated successfully");
             } else {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add or update project");
             }
@@ -172,5 +171,71 @@ public class ApiDuAnTuThienController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You can not permission to edit the post");
         }
 
+    }
+
+    @DeleteMapping("/charity-project/{id}/")
+    public ResponseEntity<String> deleteProject(@PathVariable(value = "id") int id, Principal user) {
+        ThanhVien u = this.userService.getUserByUsername(user.getName());
+        DuAnTuThien duAnTuThien = this.duAnTuThienService.getDuAnTuThienById(id);
+
+        if (duAnTuThien.getMaThanhVienTaoDA().equals(u)) {
+            if (this.duAnTuThienService.deleteProject(duAnTuThien)) {
+                return ResponseEntity.status(HttpStatus.OK).body("Project delete successfully");
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete project");
+            }
+
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("You can not permission to delete the post");
+        }
+
+    }
+
+    @GetMapping("/charity-project/{id}/")
+    public ResponseEntity<CharityProjectResponseDTO> getProjecbyId(@PathVariable(value = "id") int id) {
+        DuAnTuThien duAnTuThien = this.duAnTuThienService.getDuAnTuThienById(id);
+        UserResponseDTO userResponseDTO = new UserResponseDTO();
+        CharityProjectResponseDTO charityProjectResponseDTO = new CharityProjectResponseDTO();
+
+        charityProjectResponseDTO.setId(duAnTuThien.getMaDuAn());
+        charityProjectResponseDTO.setNameProject(duAnTuThien.getTenDuAn());
+        charityProjectResponseDTO.setPurpose(duAnTuThien.getMucDich());
+        charityProjectResponseDTO.setAddress(duAnTuThien.getDiaDiem());
+        if (duAnTuThien.getThoiGianBatDau() != null) {
+            charityProjectResponseDTO.setStartTime(F.format(duAnTuThien.getThoiGianBatDau()));
+        }
+
+        if (duAnTuThien.getThoiGianKetThuc() != null) {
+            charityProjectResponseDTO.setEndTime(F.format(duAnTuThien.getThoiGianKetThuc()));
+        }
+        charityProjectResponseDTO.setCreateAt(duAnTuThien.getNgayTao());
+        charityProjectResponseDTO.setUpdateAt(duAnTuThien.getNgayCapNhat());
+        charityProjectResponseDTO.setAmountRaised(duAnTuThien.getSoTienHuyDong());
+        List<HinhAnhDuAn> listImage = this.hinhAnhDuAnService.listHinhAnh(duAnTuThien);
+        List<ImagePostDTO> imageDTOs = new ArrayList<>();
+        listImage.forEach(img -> {
+            ImagePostDTO imagePostDTO = new ImagePostDTO();
+            imagePostDTO.setLink(img.getDuongDanHinh());
+
+            imageDTOs.add(imagePostDTO);
+        });
+        charityProjectResponseDTO.setImages(imageDTOs);
+
+        userResponseDTO.setUsername(duAnTuThien.getMaThanhVienTaoDA().getTenDangNhap());
+        userResponseDTO.setAvatar(duAnTuThien.getMaThanhVienTaoDA().getAnhDaiDien());
+        userResponseDTO.setId(duAnTuThien.getMaThanhVienTaoDA().getMaThanhVien());
+        userResponseDTO.setAddress(duAnTuThien.getMaThanhVienTaoDA().getDiaChi());
+        userResponseDTO.setCreateAt(duAnTuThien.getMaThanhVienTaoDA().getNgayTao());
+        userResponseDTO.setUpdateAt(duAnTuThien.getMaThanhVienTaoDA().getNgayCapNhat());
+        userResponseDTO.setDateOfBirth(duAnTuThien.getMaThanhVienTaoDA().getNgaySinh());
+        userResponseDTO.setEmail(duAnTuThien.getMaThanhVienTaoDA().getEmail());
+        userResponseDTO.setFirstName(duAnTuThien.getMaThanhVienTaoDA().getTen());
+        userResponseDTO.setLastName(duAnTuThien.getMaThanhVienTaoDA().getHo());
+        userResponseDTO.setPhone(duAnTuThien.getMaThanhVienTaoDA().getSoDienThoai());
+        userResponseDTO.setGender(duAnTuThien.getMaThanhVienTaoDA().getGioiTinh());
+
+        charityProjectResponseDTO.setUser(userResponseDTO);
+
+        return new ResponseEntity<>(charityProjectResponseDTO, HttpStatus.OK);
     }
 }

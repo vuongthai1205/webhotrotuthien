@@ -12,6 +12,8 @@
 <form:form method="post" action="${action}" modelAttribute="post" enctype="multipart/form-data">
     <form:hidden path="maBaiViet" />
     <form:hidden path="maThanhVien.maThanhVien" />
+    <form:hidden path="thoiGianBatDau" />
+    <form:hidden path="thoiGianKetThuc" />
     <form:hidden path="ngayTao" />
     <form:hidden path="ngayCapNhat" />
     <div class="form-floating mb-3 mt-3">
