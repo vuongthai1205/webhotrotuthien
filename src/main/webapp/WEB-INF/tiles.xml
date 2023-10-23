@@ -51,6 +51,11 @@ Software Foundation//DTD Tiles Configuration 3.0//EN"
         <put-attribute name="content"
                        value="/WEB-INF/jsp/post.jsp" />
     </definition>
+    <definition name="report" extends="baseLayout">
+        <put-attribute name="title" value="Manager Report" />
+        <put-attribute name="content"
+                       value="/WEB-INF/jsp/report.jsp" />
+    </definition>
     <definition name="detail-post" extends="baseLayout">
         <put-attribute name="title" value="Chi tiet bai viet" />
         <put-attribute name="content"
@@ -70,5 +75,10 @@ Software Foundation//DTD Tiles Configuration 3.0//EN"
         <put-attribute name="title" value="Stats" />
         <put-attribute name="content"
                        value="/WEB-INF/jsp/stats.jsp" />
+    </definition>
+<definition name="stats-project" extends="baseLayout">
+        <put-attribute name="title" value="Stats Project" />
+        <put-attribute name="content"
+                       value="/WEB-INF/jsp/stats-project.jsp" />
     </definition>
 </tiles-definitions>

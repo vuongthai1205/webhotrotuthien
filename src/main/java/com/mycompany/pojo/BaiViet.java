@@ -91,11 +91,6 @@ public class BaiViet implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "baiViet", fetch = FetchType.EAGER)
     private List<HinhAnhBaiViet> hinhAnhBaiViets;
     
-    @JoinTable(name = "the_bai_viet", joinColumns = {
-        @JoinColumn(name = "MaBaiViet", referencedColumnName = "MaBaiViet")}, inverseJoinColumns = {
-        @JoinColumn(name = "MaThe", referencedColumnName = "MaThe")})
-    @ManyToMany
-    private Set<The> theSet;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "baiViet")
     private Set<DauGia> dauGiaSet;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "baiViet")
@@ -195,14 +190,6 @@ public class BaiViet implements Serializable {
 
     public void setHinhAnhBaiViets(List<HinhAnhBaiViet> hinhAnhBaiViets) {
         this.hinhAnhBaiViets = hinhAnhBaiViets;
-    }
-
-    public Set<The> getTheSet() {
-        return theSet;
-    }
-
-    public void setTheSet(Set<The> theSet) {
-        this.theSet = theSet;
     }
 
     public Set<DauGia> getDauGiaSet() {

@@ -5,6 +5,8 @@
 package com.mycompany.repository.impl;
 
 import com.mycompany.pojo.BaiViet;
+import com.mycompany.pojo.DuAnTuThien;
+import com.mycompany.pojo.ThamGiaDuAn;
 import com.mycompany.pojo.TvBinhLuanBv;
 import com.mycompany.pojo.TvThichBv;
 import com.mycompany.repository.ThongKeRepository;
@@ -35,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Repository
 @Transactional
-public class ThongKeRepositoryImpl implements ThongKeRepository{
+public class ThongKeRepositoryImpl implements ThongKeRepository {
 
     public static final SimpleDateFormat F = new SimpleDateFormat("yyyy-MM-dd");
     @Autowired
@@ -103,5 +105,59 @@ public class ThongKeRepositoryImpl implements ThongKeRepository{
 
         return query.getResultList();
     }
-    
+
+    @Override
+    public List<Object[]> statsProject(Map<String, String> params) {
+        Session session = this.sessionFactory.getObject().getCurrentSession();
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<Object[]> query = cb.createQuery(Object[].class);
+        Root root = query.from(DuAnTuThien.class);
+
+        Join<ThamGiaDuAn, DuAnTuThien> projectJoin = root.join("thamGiaDuAnSet", JoinType.LEFT);
+
+        // Định nghĩa các trường bạn muốn thống kê
+        query.multiselect(
+                root.get("maDuAn").alias("maDuAn"),
+                root.get("tenDuAn").alias("tenDuAn"),
+                cb.countDistinct(projectJoin.get("thamGiaDuAnPK").get("maThanhVien")).alias("soLuongThanhVien")
+        );
+
+        // Xây dựng các điều kiện dựa trên tham số đầu vào (params)
+        List<Predicate> predicates = new ArrayList<>();
+
+        if (params != null) {
+            String fd = params.get("fromDate");
+            if (fd != null && !fd.isEmpty()) {
+                try {
+                    predicates.add(cb.greaterThanOrEqualTo(root.get("ngayTao"), F.parse(fd)));
+                } catch (ParseException ex) {
+                    Logger.getLogger(ThongKeRepositoryImpl.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+            String td = params.get("toDate");
+            if (td != null && !td.isEmpty()) {
+                try {
+                    predicates.add(cb.lessThanOrEqualTo(root.get("ngayCapNhat"), F.parse(td)));
+                } catch (ParseException ex) {
+                    Logger.getLogger(ThongKeRepositoryImpl.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+
+        // Thêm điều kiện vào truy vấn
+        if (!predicates.isEmpty()) {
+            query.where(predicates.toArray(new Predicate[0]));
+        }
+
+        // Nhóm theo mã dự án
+        query.groupBy(root.get("maDuAn"));
+
+        // Thực hiện truy vấn
+        Query<Object[]> typedQuery = session.createQuery(query);
+        List<Object[]> results = typedQuery.getResultList();
+
+        return results;
+    }
+
 }

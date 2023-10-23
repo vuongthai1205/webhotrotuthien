@@ -88,9 +88,18 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/post/**").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_MEMBER')")
                 .antMatchers(HttpMethod.GET, "/user-manager/**").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_MEMBER')")
                 .antMatchers(HttpMethod.GET, "/detail-post/**").access("hasRole('ROLE_ADMIN')")
+                .antMatchers(HttpMethod.GET, "/delete-post/**").access("hasRole('ROLE_ADMIN')")
                 .antMatchers(HttpMethod.GET, "/detail-user/**").access("hasRole('ROLE_ADMIN')")
+                .antMatchers(HttpMethod.GET, "/delete-user/**").access("hasRole('ROLE_ADMIN')")
                 .antMatchers(HttpMethod.GET, "/add-user/**").access("hasRole('ROLE_ADMIN')")
-                .antMatchers(HttpMethod.GET, "/stats/**").access("hasRole('ROLE_ADMIN')");
+                .antMatchers(HttpMethod.GET, "/stats/**").access("hasRole('ROLE_ADMIN')")
+                .antMatchers(HttpMethod.GET, "/stats-project/**").access("hasRole('ROLE_ADMIN')")
+                .antMatchers(HttpMethod.GET, "/report/**").access("hasRole('ROLE_ADMIN')")
+                .antMatchers(HttpMethod.GET, "/charityproject/**").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_MEMBER')")
+                .antMatchers(HttpMethod.GET, "/detail-charityproject/**").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_MEMBER')")
+                .antMatchers(HttpMethod.GET, "/delete-charityproject/**").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_MEMBER')")
+                .antMatchers(HttpMethod.GET, "/update-charityproject/**").access("hasRole('ROLE_ADMIN') or hasRole('ROLE_MEMBER')")
+                ;
 
         http.csrf().disable();
     }

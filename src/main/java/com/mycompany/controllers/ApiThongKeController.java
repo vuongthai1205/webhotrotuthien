@@ -28,4 +28,8 @@ public class ApiThongKeController {
     public ResponseEntity<List<Object[]>>  getStats(@RequestParam Map<String, String> params) {
         return new ResponseEntity<>(this.statsService.stats(params), HttpStatus.OK);
     }
+    @GetMapping("/stats-project/")
+    public ResponseEntity<List<Object[]>>  getStatsProject(@RequestParam Map<String, String> params) {
+        return new ResponseEntity<>(this.statsService.statsProject(params), HttpStatus.OK);
+    }
 }

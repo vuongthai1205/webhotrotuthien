@@ -13,4 +13,5 @@ import java.util.Map;
  */
 public interface ThongKeRepository {
     List<Object[]> stats(Map<String, String> params);
+    List<Object[]> statsProject(Map<String, String> params);
 }

@@ -39,4 +39,13 @@ public class IndexController {
         return "stats";
     }
     
+    @RequestMapping(value = "/stats-project")
+    public String statsProject(Model model, @RequestParam Map<String, String> params) throws JsonProcessingException {
+        List<Object[]> statsData = statsService.statsProject(params);
+        ObjectMapper objectMapper = new ObjectMapper();
+        String statsDataJson = objectMapper.writeValueAsString(statsData);
+        model.addAttribute("statsData", statsDataJson);
+        return "stats-project";
+    }
+    
 }

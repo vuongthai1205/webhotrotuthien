@@ -6,14 +6,20 @@ package com.mycompany.controllers;
 
 import com.mycompany.DTO.CharityProjectRequestDTO;
 import com.mycompany.DTO.CharityProjectResponseDTO;
+import com.mycompany.DTO.CommentResponseDTO;
 import com.mycompany.DTO.ImagePostDTO;
 import com.mycompany.DTO.LinkImageDTO;
 import com.mycompany.DTO.UserResponseDTO;
 import com.mycompany.pojo.DuAnTuThien;
 import com.mycompany.pojo.HinhAnhDuAn;
+import com.mycompany.pojo.ThamGiaDuAn;
 import com.mycompany.pojo.ThanhVien;
+import com.mycompany.pojo.TvBinhLuanBv;
+import com.mycompany.pojo.TvBinhLuanDa;
+import com.mycompany.service.BinhLuanDuAnService;
 import com.mycompany.service.DuAnTuThienService;
 import com.mycompany.service.HinhAnhDuAnService;
+import com.mycompany.service.ThamGiaDuAnService;
 import com.mycompany.service.ThanhVienService;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
@@ -51,20 +57,44 @@ public class ApiDuAnTuThienController {
     private HinhAnhDuAnService hinhAnhDuAnService;
     @Autowired
     private ThanhVienService userService;
+    @Autowired
+    private BinhLuanDuAnService binhLuanDuAnService;
+
+    @Autowired
+    private ThamGiaDuAnService thamGiaDuAnService;
 
     @GetMapping("/charity-project/")
     public ResponseEntity<List<CharityProjectResponseDTO>> getPosts(@RequestParam Map<String, String> params) {
         List<CharityProjectResponseDTO> charityProjectResponseDTOs = new ArrayList<>();
         List<DuAnTuThien> duAnTuThiens = this.duAnTuThienService.getDuAnTuThiensWithApproved(params);
+
         duAnTuThiens.forEach(duAnTuThien -> {
             UserResponseDTO userResponseDTO = new UserResponseDTO();
             CharityProjectResponseDTO charityProjectResponseDTO = new CharityProjectResponseDTO();
-
+            List<TvBinhLuanDa> listComments = this.binhLuanDuAnService.listCommentPost(duAnTuThien);
+            List<CommentResponseDTO> listCommentDTOs = new ArrayList<>();
+            listComments.forEach(cmt -> {
+                CommentResponseDTO commentDTO = new CommentResponseDTO();
+                commentDTO.setId(cmt.getMaBinhLuan());
+                commentDTO.setImage(cmt.getThanhVien().getAnhDaiDien());
+                commentDTO.setUsername(cmt.getThanhVien().getTenDangNhap());
+                commentDTO.setContent(cmt.getNoiDung());
+                commentDTO.setIdUser(cmt.getThanhVien().getMaThanhVien());
+                listCommentDTOs.add(commentDTO);
+            });
+            charityProjectResponseDTO.setListComment(listCommentDTOs);
             charityProjectResponseDTO.setId(duAnTuThien.getMaDuAn());
             charityProjectResponseDTO.setNameProject(duAnTuThien.getTenDuAn());
             charityProjectResponseDTO.setPurpose(duAnTuThien.getMucDich());
             charityProjectResponseDTO.setAddress(duAnTuThien.getDiaDiem());
-            charityProjectResponseDTO.setAmountRaised(duAnTuThien.getSoTienHuyDong());
+
+            List<ThamGiaDuAn> thamGiaDuAns = this.thamGiaDuAnService.getThamGiaDuAnByDuAn(duAnTuThien);
+            double tongTien = thamGiaDuAns.stream()
+                    .mapToDouble(ThamGiaDuAn::getSoTienDongGop)
+                    .sum();
+
+            charityProjectResponseDTO.setAmountRaised(duAnTuThien.getSoTienHuyDong() + tongTien);
+
             if (duAnTuThien.getThoiGianBatDau() != null) {
                 charityProjectResponseDTO.setStartTime(F.format(duAnTuThien.getThoiGianBatDau()));
             }
@@ -208,9 +238,27 @@ public class ApiDuAnTuThienController {
         if (duAnTuThien.getThoiGianKetThuc() != null) {
             charityProjectResponseDTO.setEndTime(F.format(duAnTuThien.getThoiGianKetThuc()));
         }
+        List<TvBinhLuanDa> listComments = this.binhLuanDuAnService.listCommentPost(duAnTuThien);
+        List<CommentResponseDTO> listCommentDTOs = new ArrayList<>();
+        listComments.forEach(cmt -> {
+            CommentResponseDTO commentDTO = new CommentResponseDTO();
+            commentDTO.setId(cmt.getMaBinhLuan());
+            commentDTO.setImage(cmt.getThanhVien().getAnhDaiDien());
+            commentDTO.setUsername(cmt.getThanhVien().getTenDangNhap());
+            commentDTO.setContent(cmt.getNoiDung());
+            commentDTO.setIdUser(cmt.getThanhVien().getMaThanhVien());
+            listCommentDTOs.add(commentDTO);
+        });
+        charityProjectResponseDTO.setListComment(listCommentDTOs);
         charityProjectResponseDTO.setCreateAt(duAnTuThien.getNgayTao());
         charityProjectResponseDTO.setUpdateAt(duAnTuThien.getNgayCapNhat());
-        charityProjectResponseDTO.setAmountRaised(duAnTuThien.getSoTienHuyDong());
+        List<ThamGiaDuAn> thamGiaDuAns = this.thamGiaDuAnService.getThamGiaDuAnByDuAn(duAnTuThien);
+        double tongTien = thamGiaDuAns.stream()
+                .mapToDouble(ThamGiaDuAn::getSoTienDongGop)
+                .sum();
+
+        charityProjectResponseDTO.setAmountRaised(duAnTuThien.getSoTienHuyDong() + tongTien);
+
         List<HinhAnhDuAn> listImage = this.hinhAnhDuAnService.listHinhAnh(duAnTuThien);
         List<ImagePostDTO> imageDTOs = new ArrayList<>();
         listImage.forEach(img -> {

@@ -27,6 +27,7 @@ public class CharityProjectResponseDTO {
     private double amountRaised;
     private UserResponseDTO user;
     private List<ImagePostDTO> images;
+    private List<CommentResponseDTO> listComment;
     private Date createAt;
     private Date updateAt;
 }

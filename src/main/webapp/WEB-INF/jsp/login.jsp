@@ -24,7 +24,7 @@
                                     <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
                                 </div>
                                 <c:if test="${param.error != null}">
-                                    <h1>Da có loi</h1>
+                                    <h1 style="font-size: 12px; color: red">Please check your account again</h1>
                                 </c:if>
                                 <c:url value="/login" var="action" />
                                 <form class="user" method="post" action="${action}">

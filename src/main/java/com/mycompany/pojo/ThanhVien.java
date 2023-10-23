@@ -101,7 +101,7 @@ public class ThanhVien implements UserDetails {
     @Size(max = 100)
     @Column(name = "DiaChi")
     private String diaChi;
-    @Size(max = 100)
+    @Size(max = 200)
     @Column(name = "AnhDaiDien")
     private String anhDaiDien;
     @Column(name = "NgayTao")
@@ -124,6 +124,9 @@ public class ThanhVien implements UserDetails {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "thanhVien")
     @JsonIgnore
     private Set<TvBinhLuanBv> tvBinhLuanBvSet;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "thanhVien")
+    @JsonIgnore
+    private Set<TvBinhLuanDa> tvBinhLuanDaSet;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "thanhVien")
     @JsonIgnore
     private Set<TvThichBv> tvThichBvSet;
@@ -473,6 +476,20 @@ public class ThanhVien implements UserDetails {
      */
     public void setFile(MultipartFile file) {
         this.file = file;
+    }
+
+    /**
+     * @return the tvBinhLuanDaSet
+     */
+    public Set<TvBinhLuanDa> getTvBinhLuanDaSet() {
+        return tvBinhLuanDaSet;
+    }
+
+    /**
+     * @param tvBinhLuanDaSet the tvBinhLuanDaSet to set
+     */
+    public void setTvBinhLuanDaSet(Set<TvBinhLuanDa> tvBinhLuanDaSet) {
+        this.tvBinhLuanDaSet = tvBinhLuanDaSet;
     }
 
     

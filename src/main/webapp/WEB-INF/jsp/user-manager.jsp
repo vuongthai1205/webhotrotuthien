@@ -30,9 +30,9 @@
                         <th>Avatar</th>
                         <th>Gender</th>
                         <th>Address</th>
-                        <th>Ngay tao</th>
-                        <th>Ngay cap nhat</th>
-                        <th>Hanh dong</th>
+                        <th>Create at</th>
+                        <th>Update at</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -64,8 +64,7 @@
                             <td>
                                 <sec:authorize access="hasRole('ROLE_ADMIN')">
                                     <c:url value="/api/user/${user.maThanhVien}" var="apiDel"/>
-                                    <a href="<c:url value="/detail-user/${user.maThanhVien}"/>">Cap nhat</a>
-                                    <button class="btn btn-danger" onclick="delPro('${apiDel}', ${user.maThanhVien})">Xóa</button>
+                                    <a href="<c:url value="/detail-user/${user.maThanhVien}"/>">Update</a>
                                 </sec:authorize> 
                                 <sec:authorize access="hasRole('ROLE_MEMBER')">
                                     Ban khong co quyen sua hoac xoa

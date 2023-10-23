@@ -1,8 +1,13 @@
-<!-- Page Heading -->
+<%-- 
+    Document   : stats-project
+    Created on : Oct 19, 2023, 2:17:28 PM
+    Author     : vuongthai1205
+--%>
+
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<c:url value="/stats" var="action" />
+<c:url value="/stats-project" var="action" />
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <form method="get" action="${action}">
         <label for="fromDate">From date</label>
@@ -11,7 +16,7 @@
         <label for="toDate">To date</label>
         <input type="date" 
                name="toDate" id="fromDate" />
-        <input type="submit" value="Filter"/>
+        <input type="submit" value="Filter" />
     </form>
 </div>
 
@@ -27,24 +32,17 @@
     const statsData = ${statsData};
 
     const labels = statsData.map(data => data[1]);
-    const likeCounts = statsData.map(data => data[2]);
-    const commentCounts = statsData.map(data => data[3]);
-
+    const peopleCount = statsData.map(data => data[2]);
+    console.log(statsData);
     new Chart(ctx, {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{
-                    label: 'like',
-                    data: likeCounts,
+                    label: 'User Join',
+                    data: peopleCount,
                     backgroundColor: 'rgba(75, 192, 192, 0.2)',
                     borderColor: 'rgba(75, 192, 192, 1)',
-                    borderWidth: 1
-                }, {
-                    label: 'comment',
-                    data: commentCounts,
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgba(255, 99, 132, 1)',
                     borderWidth: 1
                 }]
         },

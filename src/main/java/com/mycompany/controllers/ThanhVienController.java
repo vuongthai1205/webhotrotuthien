@@ -8,10 +8,12 @@ import com.mycompany.pojo.Quyen;
 import com.mycompany.pojo.ThanhVien;
 import com.mycompany.service.QuyenService;
 import com.mycompany.service.ThanhVienService;
+import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -55,11 +57,40 @@ public class ThanhVienController {
         return "add-user";
     }
 
+    @GetMapping("/delete-user/{id}")
+    public String getDeleteUser(Model model, @PathVariable(value = "id") int id) {
+        if (this.thanhVienService.deleteUser(id) == true) {
+            return "redirect:/user-manager";
+        }
+        return "detail-user";
+    }
+
     @GetMapping("/detail-user/{id}")
     public String detailUser(Model model, @PathVariable(value = "id") int id) {
         ThanhVien user = this.thanhVienService.getUserById(id);
         model.addAttribute("user", user);
         return "detail-user";
+    }
+
+    @PostMapping("/add-user")
+    public String submitAddUser(@ModelAttribute(value = "user") @Valid ThanhVien user, BindingResult rs, Model model) {
+
+        if (!rs.hasErrors()) {
+            Quyen role = this.quyenService.getRole(user.getRole().getMaQuyen());
+            user.addRole(role);
+
+            List<ThanhVien> users = this.thanhVienService.getUsers(user.getTenDangNhap());
+            if (!users.isEmpty()) {
+                
+                model.addAttribute("error", "Username exists in database, please choose another username");
+                return "add-user";
+            }
+
+            if (this.thanhVienService.addOrUpdateUser(user) == true) {
+                return "redirect:/user-manager";
+            }
+        }
+        return "add-user";
     }
 
     @PostMapping("/detail-user")
@@ -73,6 +104,5 @@ public class ThanhVienController {
         }
         return "detail-user";
     }
-
 
 }

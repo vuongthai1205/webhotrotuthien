@@ -89,6 +89,8 @@ public class DuAnTuThien implements Serializable {
     private Date ngayCapNhat;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "duAnTuThien")
     private Set<ThamGiaDuAn> thamGiaDuAnSet;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "duAnTuThien")
+    private Set<TvBinhLuanDa> tvBinhLuanDaSet;
     @JoinColumn(name = "MaThanhVienTaoDA", referencedColumnName = "MaThanhVien")
     @ManyToOne(optional = false)
     private ThanhVien maThanhVienTaoDA;
@@ -259,6 +261,20 @@ public class DuAnTuThien implements Serializable {
      */
     public void setFile(MultipartFile[] file) {
         this.file = file;
+    }
+
+    /**
+     * @return the tvBinhLuanDaSet
+     */
+    public Set<TvBinhLuanDa> getTvBinhLuanDaSet() {
+        return tvBinhLuanDaSet;
+    }
+
+    /**
+     * @param tvBinhLuanDaSet the tvBinhLuanDaSet to set
+     */
+    public void setTvBinhLuanDaSet(Set<TvBinhLuanDa> tvBinhLuanDaSet) {
+        this.tvBinhLuanDaSet = tvBinhLuanDaSet;
     }
     
 }

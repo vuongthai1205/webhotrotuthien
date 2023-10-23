@@ -13,6 +13,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -26,7 +28,15 @@ import javax.persistence.TemporalType;
 @NamedQueries({
     @NamedQuery(name = "BaoCaoThanhVien.findAll", query = "SELECT b FROM BaoCaoThanhVien b")})
 public class BaoCaoThanhVien implements Serializable {
+    @PrePersist
+    protected void onCreate() {
+        this.ngayTao = new Date(System.currentTimeMillis());
+    }
 
+    @PreUpdate
+    protected void onUpdate() {
+        this.ngayCapNhat = new Date(System.currentTimeMillis());
+    }
     private static final long serialVersionUID = 1L;
     @EmbeddedId
     protected BaoCaoThanhVienPK baoCaoThanhVienPK;

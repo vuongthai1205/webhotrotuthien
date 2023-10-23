@@ -14,8 +14,6 @@
     <form:hidden path="anhDaiDien" />
     <form:hidden path="matKhau" />
     <form:hidden path="ngaySinh"/>
-    <form:hidden path="gioiTinh" />
-    <form:hidden path="diaChi" />
     <form:hidden path="ngayTao"/>
     <form:errors path="*" element="div" /> 
     <div class="form-floating mb-3 mt-3">
@@ -44,6 +42,31 @@
         <form:input type="email" class="form-control" 
                     path="email" placeholder="Enter email" />
     </div>
+    <div class="form-floating">
+        <label for="des">Date of birth ${user.ngaySinh}</label>
+        <form:input type="date" class="form-control" 
+                    path="dateString" placeholder="Enter date of birth" />
+    </div>
+    <div class="form-floating">
+        <label for="des">Gender</label>
+        <form:select class="form-select"  path="gioiTinh">
+            <c:choose>
+                <c:when test="${user.gioiTinh == 1}">
+                    <option value="1" selected>Male</option>
+                    <option value="0">Female</option>
+                </c:when>
+                <c:otherwise>
+                    <option value="1" >Male</option>
+                    <option value="0" selected>Female</option>
+                </c:otherwise>
+            </c:choose>
+        </form:select>
+    </div>
+    <div class="form-floating">
+        <label for="des">Address</label>
+        <form:input type="text" class="form-control" 
+                    path="diaChi" placeholder="Enter address" />
+    </div>
     <div class="form-floating mb-3 mt-3">
         <label for="file">Avatar</label>
         <form:input type="file" class="form-control" 
@@ -55,25 +78,25 @@
     </div>
     <div class="form-floating mb-3 mt-3">
 
-        
-            <c:forEach items="${user.quyenSet}" var="a">
-                <form:select class="form-select" path="role">
-                    <c:forEach items="${roles}" var="i">
-                        <c:choose>
-                            <c:when test="${i.maQuyen == a.maQuyen}">
-                                <option value="${i.maQuyen}" selected>${i.tenQuyen}</option>
-                            </c:when>
-                            <c:otherwise>
-                                <option value="${i.maQuyen}">${i.tenQuyen}</option>
-                            </c:otherwise>
-                        </c:choose>
-                    </c:forEach>
+
+        <c:forEach items="${user.quyenSet}" var="a">
+            <form:select class="form-select" path="role">
+                <c:forEach items="${roles}" var="i">
+                    <c:choose>
+                        <c:when test="${i.maQuyen == a.maQuyen}">
+                            <option value="${i.maQuyen}" selected>${i.tenQuyen}</option>
+                        </c:when>
+                        <c:otherwise>
+                            <option value="${i.maQuyen}">${i.tenQuyen}</option>
+                        </c:otherwise>
+                    </c:choose>
+                </c:forEach>
 
 
-                </form:select>
+            </form:select>
 
 
-            </c:forEach>
+        </c:forEach>
 
 
         <label for="auctionStatus" class="form-label">User Role</label>
@@ -86,3 +109,6 @@
     </div>
 
 </form:form>
+<a href="<c:url value="/delete-user/${user.maThanhVien}"/>">
+    Delete User
+</a>

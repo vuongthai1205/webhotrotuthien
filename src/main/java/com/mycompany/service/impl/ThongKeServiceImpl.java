@@ -23,5 +23,10 @@ public class ThongKeServiceImpl implements ThongKeService {
     public List<Object[]> stats(Map<String, String> params) {
         return this.thongKeRepository.stats(params);
     }
+
+    @Override
+    public List<Object[]> statsProject(Map<String, String> params) {
+        return this.thongKeRepository.statsProject(params);
+    }
     
 }

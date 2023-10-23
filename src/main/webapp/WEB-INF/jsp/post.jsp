@@ -46,7 +46,7 @@
                             <td><c:out value="${post.ngayCapNhat}"/></td>
                             <td>
                                 <sec:authorize access="hasRole('ROLE_ADMIN') or hasRole('ROLE_MEMBER')">
-                                    <a href="<c:url value="/detail-post/${post.maBaiViet}"/>">Cap nhat</a>
+                                    <a href="<c:url value="/detail-post/${post.maBaiViet}"/>">Update</a>
                                 </sec:authorize> 
                                 <sec:authorize access="hasRole('ROLE_CUSTOMER')">
                                     Ban khong co quyen sua hoac xoa

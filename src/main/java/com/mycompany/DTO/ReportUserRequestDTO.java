@@ -4,7 +4,6 @@
  */
 package com.mycompany.DTO;
 
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,12 +15,8 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class JoinProjectResponseDTO {
-    UserResponseDTO user;
-    CharityProjectResponseDTO project;
-    private double contributionAmount;
-    private String contributionOther;
-    private String role;
-    private int roleId;
-    private Date ngayThamGia;
+public class ReportUserRequestDTO {
+    private int idUser;
+    private String reportReason;
+    
 }

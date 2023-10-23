@@ -26,12 +26,18 @@
     <li class="nav-item">
         <a class="nav-link" href="<c:url value="/stats"/>">
             <i class="fas fa-fw fa-table"></i>
-            <span>Thống kê</span></a>
+            <span>Stats Post</span></a>
+    </li>
+    
+    <li class="nav-item">
+        <a class="nav-link" href="<c:url value="/stats-project"/>">
+            <i class="fas fa-fw fa-table"></i>
+            <span>Stats Project</span></a>
     </li>
     <li class="nav-item">
         <a class="nav-link" href="<c:url value="/post"/>">
             <i class="fas fa-fw fa-table"></i>
-            <span>Quản lý bài viết</span></a>
+            <span>Post Manager</span></a>
     </li>
     <li class="nav-item">
         <a class="nav-link" href="<c:url value="/user-manager"/>">
@@ -42,6 +48,11 @@
         <a class="nav-link" href="<c:url value="/charityproject/"/>">
             <i class="fas fa-fw fa-table"></i>
             <span>Manager Charity Project</span></a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="<c:url value="/report/"/>">
+            <i class="fas fa-fw fa-table"></i>
+            <span>Manager Report</span></a>
     </li>
 
     <!-- Divider -->

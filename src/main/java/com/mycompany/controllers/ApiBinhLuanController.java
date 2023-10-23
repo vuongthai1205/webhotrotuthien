@@ -6,10 +6,14 @@ package com.mycompany.controllers;
 
 import com.mycompany.DTO.CommentRequestDTO;
 import com.mycompany.pojo.BaiViet;
+import com.mycompany.pojo.DuAnTuThien;
 import com.mycompany.pojo.ThanhVien;
 import com.mycompany.pojo.TvBinhLuanBv;
+import com.mycompany.pojo.TvBinhLuanDa;
 import com.mycompany.service.BaiVietService;
+import com.mycompany.service.BinhLuanDuAnService;
 import com.mycompany.service.BinhLuanService;
+import com.mycompany.service.DuAnTuThienService;
 import com.mycompany.service.ThanhVienService;
 import java.security.Principal;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +42,10 @@ public class ApiBinhLuanController {
     private BaiVietService postService;
     @Autowired
     private ThanhVienService userService;
-
+    @Autowired
+    private BinhLuanDuAnService binhLuanService;
+    @Autowired
+    private DuAnTuThienService duAnTuThienService;
     @PostMapping("/post/comment/{id-post}/")
     public ResponseEntity<String> addComment(Principal user, @PathVariable(value = "id-post") int id, @RequestBody CommentRequestDTO commentRequestDTO) {
         ThanhVien u = this.userService.getUserByUsername(user.getName());
@@ -54,6 +61,24 @@ public class ApiBinhLuanController {
 
         return new ResponseEntity<>("comment loi", HttpStatus.BAD_REQUEST);
     }
+    
+    @PostMapping("/project/comment/{id-project}/")
+    public ResponseEntity<String> addCommentProject(Principal user, @PathVariable(value = "id-project") int id, @RequestBody CommentRequestDTO commentRequestDTO) {
+        ThanhVien u = this.userService.getUserByUsername(user.getName());
+        DuAnTuThien project = this.duAnTuThienService.getDuAnTuThienById(id);
+
+        TvBinhLuanDa newComment = new TvBinhLuanDa();
+        newComment.setDuAnTuThien(project);
+        newComment.setThanhVien(u);
+        newComment.setNoiDung(commentRequestDTO.getContent());
+        if (this.binhLuanService.addComment(newComment)) {
+            return new ResponseEntity<>("Cmt", HttpStatus.CREATED);
+        }
+
+        return new ResponseEntity<>("comment loi", HttpStatus.BAD_REQUEST);
+    }
+    
+    
     
     @PutMapping("/post/comment/{id}/")
     public ResponseEntity<String> updateComment(Principal user, @PathVariable(value = "id") int id, @RequestBody CommentRequestDTO commentRequestDTO){
@@ -74,6 +99,25 @@ public class ApiBinhLuanController {
         }
     }
     
+    @PutMapping("/project/comment/{id}/")
+    public ResponseEntity<String> updateCommentProject(Principal user, @PathVariable(value = "id") int id, @RequestBody CommentRequestDTO commentRequestDTO){
+        ThanhVien u = this.userService.getUserByUsername(user.getName());
+        TvBinhLuanDa comment = this.binhLuanService.getCommentById(id);
+        
+        if (comment.getThanhVien().equals(u)) {
+            comment.setNoiDung(commentRequestDTO.getContent());
+            if (this.binhLuanService.addComment(comment)) {
+                return new ResponseEntity<>("comment thanh cong", HttpStatus.OK);
+            }
+            else{
+                return new ResponseEntity<>("comment loi", HttpStatus.BAD_REQUEST);
+            }
+        }
+        else{
+            return new ResponseEntity<>("k có quyen sua comment", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
     @DeleteMapping("/post/comment/{id}/")
     public ResponseEntity<String> deleteComment(Principal user, @PathVariable(value = "id") int id){
         ThanhVien u = this.userService.getUserByUsername(user.getName());
@@ -81,6 +125,24 @@ public class ApiBinhLuanController {
         
         if (comment.getThanhVien().equals(u)) {
             if (this.commentService.deleteComment(comment)) {
+                return new ResponseEntity<>("xóa comment thanh cong", HttpStatus.OK);
+            }
+            else{
+                return new ResponseEntity<>("comment loi", HttpStatus.BAD_REQUEST);
+            }
+        }
+        else{
+            return new ResponseEntity<>("k có quyen xóa comment", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    
+    @DeleteMapping("/project/comment/{id}/")
+    public ResponseEntity<String> deleteCommentProject(Principal user, @PathVariable(value = "id") int id){
+        ThanhVien u = this.userService.getUserByUsername(user.getName());
+        TvBinhLuanDa comment = this.binhLuanService.getCommentById(id);
+        
+        if (comment.getThanhVien().equals(u)) {
+            if (this.binhLuanService.deleteComment(comment)) {
                 return new ResponseEntity<>("xóa comment thanh cong", HttpStatus.OK);
             }
             else{

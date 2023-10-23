@@ -104,6 +104,15 @@ public class ThanhVienServiceImpl implements ThanhVienService {
                     Logger.getLogger(ThanhVienServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+            
+            if (user.getDateString() != null) {
+                try {
+                    Date dateOfBirth = F.parse(user.getDateString());
+                    user.setNgaySinh(dateOfBirth);
+                } catch (ParseException ex) {
+                    Logger.getLogger(ThanhVienServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
 
             this.thanhVienRepository.addOrUpdateUser(user);
             return true;

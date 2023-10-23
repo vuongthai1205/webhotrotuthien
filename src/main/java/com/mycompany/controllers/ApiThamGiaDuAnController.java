@@ -14,6 +14,7 @@ import com.mycompany.pojo.ThamGiaDuAnPK;
 import com.mycompany.pojo.ThanhVien;
 import com.mycompany.pojo.VaiTroThamGiaDa;
 import com.mycompany.service.DuAnTuThienService;
+import com.mycompany.service.EmailService;
 import com.mycompany.service.ThamGiaDuAnService;
 import com.mycompany.service.ThanhVienService;
 import com.mycompany.service.VaiTroThamGiaDuAnService;
@@ -51,6 +52,8 @@ public class ApiThamGiaDuAnController {
 
     @Autowired
     private VaiTroThamGiaDuAnService vaiTroThamGiaDuAnService;
+    @Autowired
+    private EmailService emailService;
 
     @PostMapping("/join-project/")
     public ResponseEntity<String> addJoinProject(Principal user, @RequestBody JoinProjectRequestDTO joinProjectRequestDTO) {
@@ -68,6 +71,12 @@ public class ApiThamGiaDuAnController {
         thamGiaDuAn.setMaVaiTroThamGiaDA(vaiTroThamGiaDa);
         thamGiaDuAn.setThamGiaDuAnPK(duAnPK);
         if (this.thamGiaDuAnService.addUserToProject(thamGiaDuAn)) {
+            this.emailService.sendSimpleMessage(thamGiaDuAn.getThanhVien().getEmail(), "Thank you for join project",
+                    "Thank " + 
+                    thamGiaDuAn.getThanhVien().getTen() +
+                    ", for participating in " +
+                    thamGiaDuAn.getDuAnTuThien().getTenDuAn() +
+                    " project");
             return new ResponseEntity<>("oke", HttpStatus.CREATED);
         } else {
             return new ResponseEntity<>("not oke", HttpStatus.BAD_REQUEST);
@@ -102,11 +111,12 @@ public class ApiThamGiaDuAnController {
         }
 
     }
-    @DeleteMapping("/join-project/")
-    public ResponseEntity<String> deleteJoinProject(Principal user, @RequestBody JoinProjectRequestDTO joinProjectRequestDTO){
+
+    @DeleteMapping("/join-project/{id-project}/{id-user}")
+    public ResponseEntity<String> deleteJoinProject(Principal user, @PathVariable(value = "id-project") int idProject, @PathVariable(value = "id-user") int idUser) {
         ThanhVien u = this.thanhVienService.getUserByUsername(user.getName());
-        DuAnTuThien duAnTuThien = this.duAnTuThienService.getDuAnTuThienById(joinProjectRequestDTO.getIdProject());
-        ThanhVien thanhVien = this.thanhVienService.getUserById(joinProjectRequestDTO.getIdUser());
+        DuAnTuThien duAnTuThien = this.duAnTuThienService.getDuAnTuThienById(idProject);
+        ThanhVien thanhVien = this.thanhVienService.getUserById(idUser);
         ThamGiaDuAn thamGiaDuAn = this.thamGiaDuAnService.getThamGiaDuAn(thanhVien, duAnTuThien);
         if (duAnTuThien.getMaThanhVienTaoDA().equals(u)) {
             if (this.thamGiaDuAnService.deleteJoinProject(thamGiaDuAn)) {
@@ -124,9 +134,9 @@ public class ApiThamGiaDuAnController {
             return new ResponseEntity<>("You can not permission to delete the project", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-    
+
     @GetMapping("/join-project/{id}/")
-    public ResponseEntity<List<JoinProjectResponseDTO>> getJoinProject(@PathVariable(value = "id") int id){
+    public ResponseEntity<List<JoinProjectResponseDTO>> getJoinProject(@PathVariable(value = "id") int id) {
         DuAnTuThien duAnTuThien = this.duAnTuThienService.getDuAnTuThienById(id);
         List<ThamGiaDuAn> thamGiaDuAns = this.thamGiaDuAnService.getThamGiaDuAnByDuAn(duAnTuThien);
         List<JoinProjectResponseDTO> joinProjectResponseDTOs = new ArrayList<>();
@@ -134,15 +144,25 @@ public class ApiThamGiaDuAnController {
             JoinProjectResponseDTO joinProjectResponseDTO = new JoinProjectResponseDTO();
             UserResponseDTO userResponseDTO = new UserResponseDTO();
             userResponseDTO.setUsername(d.getThanhVien().getUsername());
+            userResponseDTO.setAvatar(d.getThanhVien().getAnhDaiDien());
+            userResponseDTO.setId(d.getThanhVien().getMaThanhVien());
+
+            UserResponseDTO uResponseDTO = new UserResponseDTO();
+            uResponseDTO.setUsername(d.getDuAnTuThien().getMaThanhVienTaoDA().getUsername());
+            uResponseDTO.setAvatar(d.getDuAnTuThien().getMaThanhVienTaoDA().getAnhDaiDien());
+            uResponseDTO.setId(d.getDuAnTuThien().getMaThanhVienTaoDA().getMaThanhVien());
+
             CharityProjectResponseDTO charityProjectResponseDTO = new CharityProjectResponseDTO();
             charityProjectResponseDTO.setNameProject(d.getDuAnTuThien().getTenDuAn());
+            charityProjectResponseDTO.setId(d.getDuAnTuThien().getMaDuAn());
+            charityProjectResponseDTO.setUser(uResponseDTO);
             joinProjectResponseDTO.setUser(userResponseDTO);
             joinProjectResponseDTO.setProject(charityProjectResponseDTO);
             joinProjectResponseDTO.setContributionAmount(d.getSoTienDongGop());
             joinProjectResponseDTO.setContributionOther(d.getCacDongGopKhac());
             joinProjectResponseDTO.setNgayThamGia(d.getNgayTao());
-            
-            
+            joinProjectResponseDTO.setRole(d.getMaVaiTroThamGiaDA().getTenVaiTro());
+            joinProjectResponseDTO.setRoleId(d.getMaVaiTroThamGiaDA().getMaVaiTroThamGiaDA());
             joinProjectResponseDTOs.add(joinProjectResponseDTO);
         });
         return new ResponseEntity<>(joinProjectResponseDTOs, HttpStatus.OK);

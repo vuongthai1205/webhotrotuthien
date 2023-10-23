@@ -9,13 +9,16 @@
 <%@taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 
-<c:url value="/detail-user" var="action" />
+<c:url value="/add-user" var="action" />
 <form:form method="post" action="${action}" modelAttribute="user" enctype="multipart/form-data">
-    
+    <h1 style="font-size: 16px; color: red">${error}</h1>
+    <form:errors path="*" element="div" /> 
     <div class="form-floating mb-3 mt-3">
         <label for="name">User Name</label>
         <form:input type="text" class="form-control" 
                     path="tenDangNhap" placeholder="Enter User name" />
+        
+        <form:errors path="tenDangNhap" cssClass="text-danger" />
     </div>
     <div class="form-floating">
         <label for="des">First Name</label>
@@ -49,7 +52,7 @@
     </div>
     <div class="form-floating">
         <label for="des">Gender</label>
-        <form:select class="form-select" name="auctionStatus" path="gioiTinh">
+        <form:select class="form-select" path="gioiTinh">
             <option value="1">Male</option>
             <option value="0">Female</option>
         </form:select>
