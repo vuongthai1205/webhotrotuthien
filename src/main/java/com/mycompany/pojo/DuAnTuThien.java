@@ -66,7 +66,7 @@ public class DuAnTuThien implements Serializable {
     @Size(min = 1, max = 45)
     @Column(name = "TenDuAn")
     private String tenDuAn;
-    @Size(max = 45)
+    @Size(max = 200)
     @Column(name = "MucDich")
     private String mucDich;
     @Column(name = "ThoiGianBatDau")
@@ -75,7 +75,7 @@ public class DuAnTuThien implements Serializable {
     @Column(name = "ThoiGianKetThuc")
     @Temporal(TemporalType.TIMESTAMP)
     private Date thoiGianKetThuc;
-    @Size(max = 45)
+    @Size(max = 200)
     @Column(name = "DiaDiem")
     private String diaDiem;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation

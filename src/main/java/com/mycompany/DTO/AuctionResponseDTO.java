@@ -14,14 +14,16 @@ import lombok.Setter;
  *
  * @author vuongthai1205
  */
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuctionResponseDTO {
+
     private int id;
     private String username;
     private String avatar;
     private double price;
     private boolean isWinnerAuctioned;
+    private int idUser;
+    private int idPost;
 }

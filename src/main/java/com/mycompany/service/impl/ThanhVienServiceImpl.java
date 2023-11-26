@@ -113,6 +113,9 @@ public class ThanhVienServiceImpl implements ThanhVienService {
                     Logger.getLogger(ThanhVienServiceImpl.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
+            if (user.getFakePassword() != null) {
+                user.setMatKhau(passwordEncoder.encode(user.getFakePassword()));
+            }
 
             this.thanhVienRepository.addOrUpdateUser(user);
             return true;

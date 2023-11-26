@@ -42,6 +42,12 @@
         <form:input type="email" class="form-control" 
                     path="email" placeholder="Enter email" />
     </div>
+    
+    <div class="form-floating">
+        <label for="des">Password</label>
+        <form:input type="password" class="form-control" 
+                    path="fakePassword" placeholder="Enter password" />
+    </div>
     <div class="form-floating">
         <label for="des">Date of birth ${user.ngaySinh}</label>
         <form:input type="date" class="form-control" 

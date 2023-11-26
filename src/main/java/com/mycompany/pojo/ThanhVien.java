@@ -158,6 +158,10 @@ public class ThanhVien implements UserDetails {
     @Transient
     @JsonIgnore
     private String repeatPassword;
+    
+    @Transient
+    @JsonIgnore
+    private String fakePassword;
 
     public ThanhVien() {
     }
@@ -490,6 +494,20 @@ public class ThanhVien implements UserDetails {
      */
     public void setTvBinhLuanDaSet(Set<TvBinhLuanDa> tvBinhLuanDaSet) {
         this.tvBinhLuanDaSet = tvBinhLuanDaSet;
+    }
+
+    /**
+     * @return the fakePassword
+     */
+    public String getFakePassword() {
+        return fakePassword;
+    }
+
+    /**
+     * @param fakePassword the fakePassword to set
+     */
+    public void setFakePassword(String fakePassword) {
+        this.fakePassword = fakePassword;
     }
 
     

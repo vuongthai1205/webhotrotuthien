@@ -137,6 +137,8 @@ public class ApiDauGiaController {
                 auctionResponseDTO.setAvatar(a.getThanhVien().getAnhDaiDien());
                 auctionResponseDTO.setPrice(a.getGiaTien());
                 auctionResponseDTO.setWinnerAuctioned((a.getDaThangDauGia()== 1));
+                auctionResponseDTO.setIdPost(a.getBaiViet().getMaBaiViet());
+                auctionResponseDTO.setIdUser(a.getThanhVien().getMaThanhVien());
                 auctionResponseDTOs.add(auctionResponseDTO);
             });
 
