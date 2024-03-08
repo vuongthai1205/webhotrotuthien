@@ -84,8 +84,8 @@ public class BaiVietRepositoryImpl implements BaiVietRepository {
                 if (p > 0) {  // Kiểm tra nếu page > 0 thì áp dụng giới hạn và vị trí bắt đầu
                     query.setMaxResults(pageSize);
                     query.setFirstResult((p - 1) * pageSize);
-                }
-            }
+                } 
+           }
         }
         return query.getResultList();
     }
