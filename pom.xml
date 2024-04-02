@@ -143,25 +143,16 @@
             <artifactId>spring-context-support</artifactId>
             <version>5.2.8.RELEASE</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/com.rabbitmq/amqp-client -->
         <dependency>
-            <groupId>com.rabbitmq</groupId>
-            <artifactId>amqp-client</artifactId>
-            <version>5.20.0</version>
+            <groupId>com.googlecode.jmapper-framework</groupId>
+            <artifactId>jmapper-core</artifactId>
+            <version>1.6.0.1</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.springframework.amqp/spring-amqp -->
-        <dependency>
-            <groupId>org.springframework.amqp</groupId>
-            <artifactId>spring-amqp</artifactId>
-            <version>3.1.2</version>
+        <dependency> 
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.12</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.springframework.amqp/spring-rabbit -->
-        <dependency>
-            <groupId>org.springframework.amqp</groupId>
-            <artifactId>spring-rabbit</artifactId>
-            <version>3.1.2</version>
-        </dependency>
-
     </dependencies>
 
     <build>

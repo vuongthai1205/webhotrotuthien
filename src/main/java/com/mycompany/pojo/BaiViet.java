@@ -5,6 +5,7 @@
 package com.mycompany.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.googlecode.jmapper.annotations.JMap;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
@@ -65,21 +66,26 @@ public class BaiViet implements Serializable {
     @NotNull
     @Size(min = 1, max = 105)
     @Column(name = "TieuDe")
+    @JMap("title")
     private String tieuDe;
     @Basic(optional = false)
     @NotNull
     @Lob
     @Size(min = 1, max = 65535)
     @Column(name = "NoiDung")
+    @JMap("content")
     private String noiDung;
     // @Max(value=?)  @Min(value=?)//if you know range of your decimal fields consider using these annotations to enforce field validation
     @Column(name = "GiaKhoiDiem")
+    @JMap("startPrice")
     private Double giaKhoiDiem;
     @Column(name = "ThoiGianBatDau")
+    @JMap("auctionStartTime")
     @Temporal(TemporalType.TIMESTAMP)
     private Date thoiGianBatDau;
     @Column(name = "ThoiGianKetThuc")
     @Temporal(TemporalType.TIMESTAMP)
+    @JMap("auctionEndTime")
     private Date thoiGianKetThuc;
     @Column(name = "NgayTao")
     @Temporal(TemporalType.TIMESTAMP)

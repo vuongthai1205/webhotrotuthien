@@ -4,6 +4,7 @@
  */
 package com.mycompany.controllers;
 
+import com.googlecode.jmapper.JMapper;
 import com.mycompany.DTO.AuctionStatusDTO;
 import com.mycompany.DTO.CommentResponseDTO;
 import com.mycompany.DTO.ImagePostDTO;
@@ -76,6 +77,7 @@ public class ApiBaiVietController {
     @GetMapping("/post/")
     @CrossOrigin
     public ResponseEntity<List<PostResponseDTO>> getPosts(@RequestParam Map<String, String> params) {
+
         List<PostResponseDTO> postResponseDTOs = new ArrayList<>();
         List<BaiViet> posts = this.postService.getPostList(params);
 
@@ -160,12 +162,14 @@ public class ApiBaiVietController {
         });
 
         return new ResponseEntity<>(postResponseDTOs, HttpStatus.OK);
+
     }
 
     @PostMapping(path = "/post/", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> addPost(@RequestBody PostRequestDTO postRequest, Principal user) {
+        JMapper<BaiViet, PostRequestDTO> postMapper = new JMapper<>(BaiViet.class, PostRequestDTO.class);
         ThanhVien u = this.userService.getUserByUsername(user.getName());
-        BaiViet post = new BaiViet();
+        BaiViet post = postMapper.getDestination(postRequest);
         post.setMaThanhVien(u);
 //        post.setImage(postRequest.getImage());
         List<HinhAnhBaiViet> hinhAnhBaiViets = new ArrayList<>();
@@ -179,14 +183,9 @@ public class ApiBaiVietController {
             }
         }
         post.setHinhAnhBaiViets(hinhAnhBaiViets);
-        post.setNoiDung(postRequest.getContent());
-        post.setTieuDe(postRequest.getTitle());
         TrangThaiDauGia auctionStatus = this.auctionStatusService.getAuctionStatus(postRequest.getAuctionStatus());
 
         post.setTrangThaiDauGia(auctionStatus);
-        post.setGiaKhoiDiem(postRequest.getStartPrice());
-        post.setThoiGianBatDau(postRequest.getAuctionStartTime());
-        post.setThoiGianKetThuc(postRequest.getAuctionEndTime());
         boolean isAddedOrUpdated = postService.addOrUpdatePost(post);
         if (isAddedOrUpdated) {
             return ResponseEntity.status(HttpStatus.CREATED).body("Post added or updated successfully");
@@ -197,12 +196,12 @@ public class ApiBaiVietController {
 
     @PutMapping(path = "/post/{id}/", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> updatePost(@RequestBody PostRequestDTO postRequest, Principal user, @PathVariable(value = "id") int id) {
+        
         ThanhVien u = this.userService.getUserByUsername(user.getName());
-
+        JMapper<BaiViet, PostRequestDTO> postMapper = new JMapper<>(BaiViet.class, PostRequestDTO.class);
         BaiViet post = this.postService.getPostById(id);
+        post = postMapper.getDestination(postRequest);
         if (post.getMaThanhVien().equals(u)) {
-            post.setTieuDe(postRequest.getTitle());
-//            post.setImage(postRequest.getImage());
             List<HinhAnhBaiViet> listHinhAnhBaiViets = this.imgPostService.listHinhAnh(post);
             listHinhAnhBaiViets.forEach(i -> {
                 this.imgPostService.deleteImage(i);
@@ -218,13 +217,9 @@ public class ApiBaiVietController {
                 }
             }
             post.setHinhAnhBaiViets(hinhAnhBaiViets);
-            post.setNoiDung(postRequest.getContent());
             TrangThaiDauGia auctionStatus = this.auctionStatusService.getAuctionStatus(postRequest.getAuctionStatus());
 
             post.setTrangThaiDauGia(auctionStatus);
-            post.setGiaKhoiDiem(postRequest.getStartPrice());
-            post.setThoiGianBatDau(postRequest.getAuctionStartTime());
-            post.setThoiGianKetThuc(postRequest.getAuctionEndTime());
             if (this.postService.addOrUpdatePost(post)) {
                 return ResponseEntity.status(HttpStatus.OK).body("Post updated successfully");
             } else {
@@ -272,7 +267,7 @@ public class ApiBaiVietController {
 
             likePostDTOs.add(likePostDTO);
         });
-        
+
         auctionStatusDTO.setId(post.getTrangThaiDauGia().getMaTrangThaiDauGia());
         auctionStatusDTO.setName(post.getTrangThaiDauGia().getTenTrangThai());
 
@@ -290,10 +285,10 @@ public class ApiBaiVietController {
         postResponseDTO.setImagesPost(imagePostDTOs);
         postResponseDTO.setCreateAt(post.getNgayTao());
         postResponseDTO.setUpdateAt(post.getNgayCapNhat());
-        if (post.getThoiGianBatDau()!=null) {
+        if (post.getThoiGianBatDau() != null) {
             postResponseDTO.setStartAuctionTime(F.format(post.getThoiGianBatDau()));
         }
-        if (post.getThoiGianKetThuc()!=null) {
+        if (post.getThoiGianKetThuc() != null) {
             postResponseDTO.setEndAuctionTime(F.format(post.getThoiGianKetThuc()));
         }
         postResponseDTO.setAuctionStatus(auctionStatusDTO);
@@ -305,7 +300,7 @@ public class ApiBaiVietController {
         if (post.getGiaKhoiDiem() != null) {
             postResponseDTO.setStartPrice(post.getGiaKhoiDiem());
         }
-        
+
         return new ResponseEntity<>(postResponseDTO, HttpStatus.OK);
     }
 
