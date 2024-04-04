@@ -58,7 +58,7 @@ public class DuAnTuThienRepositoryImpl implements DuAnTuThienRepository {
                 .getObject()
                 .getCurrentSession();
 
-        CriteriaBuilder b = session.getCriteriaBuilder();
+        CriteriaBuilder b = (CriteriaBuilder) session.getCriteriaBuilder();
         CriteriaQuery<DuAnTuThien> q = b.createQuery(DuAnTuThien.class);
         Root root = q.from(DuAnTuThien.class);
         q.select(root);

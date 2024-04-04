@@ -19,6 +19,7 @@ import javax.persistence.criteria.Root;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.env.Environment;
 import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.stereotype.Repository;
@@ -90,7 +91,8 @@ public class BaiVietRepositoryImpl implements BaiVietRepository {
         return query.getResultList();
     }
 
-    @Override
+    @Override 
+    @Cacheable(value = "baiviet", key = "#id")
     public BaiViet getPostById(int id) {
         Session session = this.sessionFactory
                 .getObject()

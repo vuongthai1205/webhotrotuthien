@@ -4,6 +4,9 @@
  */
 package com.mycompany.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.googlecode.jmapper.JMapper;
 import com.mycompany.DTO.AuctionStatusDTO;
 import com.mycompany.DTO.CommentResponseDTO;
@@ -22,9 +25,11 @@ import com.mycompany.pojo.TvThichBv;
 import com.mycompany.service.BaiVietService;
 import com.mycompany.service.BinhLuanService;
 import com.mycompany.service.HinhAnhBaiVietService;
+import com.mycompany.service.RedisService;
 import com.mycompany.service.ThanhVienService;
 import com.mycompany.service.ThichService;
 import com.mycompany.service.TrangThaiDauGiaService;
+import java.io.IOException;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -73,95 +78,92 @@ public class ApiBaiVietController {
 
     @Autowired
     private BinhLuanService commentService;
+    @Autowired
+    private RedisService redisService;
 
     @GetMapping("/post/")
     @CrossOrigin
-    public ResponseEntity<List<PostResponseDTO>> getPosts(@RequestParam Map<String, String> params) {
+    public ResponseEntity<List<PostResponseDTO>> getPosts(@RequestParam Map<String, String> params) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String responseRedis = redisService.getFromRedis("baiviet");
+        if (responseRedis == null) {
+            List<PostResponseDTO> postResponseDTOs = new ArrayList<>();
+            List<BaiViet> posts = this.postService.getPostList(params);
+            JMapper<UserResponseDTO, ThanhVien> userMapper = new JMapper<>(UserResponseDTO.class, ThanhVien.class);
+            posts.forEach(post -> {
+                UserResponseDTO userResponseDTO = userMapper.getDestination(post.getMaThanhVien());
+                PostResponseDTO postResponseDTO = new PostResponseDTO();
+                AuctionStatusDTO auctionStatusDTO = new AuctionStatusDTO();
 
-        List<PostResponseDTO> postResponseDTOs = new ArrayList<>();
-        List<BaiViet> posts = this.postService.getPostList(params);
+                List<TvThichBv> likePosts = this.likeService.getLikePosts(post);
+                List<LikePostDTO> likePostDTOs = new ArrayList<>();
+                likePosts.forEach(likePost -> {
+                    LikePostDTO likePostDTO = new LikePostDTO();
+                    likePostDTO.setId(likePost.getThanhVien().getMaThanhVien());
+                    likePostDTO.setImage(likePost.getThanhVien().getAnhDaiDien());
+                    likePostDTO.setUsername(likePost.getThanhVien().getTenDangNhap());
 
-        posts.forEach(post -> {
-            UserResponseDTO userResponseDTO = new UserResponseDTO();
-            PostResponseDTO postResponseDTO = new PostResponseDTO();
-            AuctionStatusDTO auctionStatusDTO = new AuctionStatusDTO();
+                    likePostDTOs.add(likePostDTO);
+                });
 
-            List<TvThichBv> likePosts = this.likeService.getLikePosts(post);
-            List<LikePostDTO> likePostDTOs = new ArrayList<>();
-            likePosts.forEach(likePost -> {
-                LikePostDTO likePostDTO = new LikePostDTO();
-                likePostDTO.setId(likePost.getThanhVien().getMaThanhVien());
-                likePostDTO.setImage(likePost.getThanhVien().getAnhDaiDien());
-                likePostDTO.setUsername(likePost.getThanhVien().getTenDangNhap());
+                List<TvBinhLuanBv> listComments = this.commentService.listCommentPost(post);
+                List<CommentResponseDTO> listCommentDTOs = new ArrayList<>();
+                listComments.forEach(cmt -> {
+                    CommentResponseDTO commentDTO = new CommentResponseDTO();
+                    commentDTO.setId(cmt.getMaBinhLuan());
+                    commentDTO.setImage(cmt.getThanhVien().getAnhDaiDien());
+                    commentDTO.setUsername(cmt.getThanhVien().getTenDangNhap());
+                    commentDTO.setContent(cmt.getNoiDung());
+                    commentDTO.setIdUser(cmt.getThanhVien().getMaThanhVien());
+                    listCommentDTOs.add(commentDTO);
+                });
+                auctionStatusDTO.setId(post.getTrangThaiDauGia().getMaTrangThaiDauGia());
+                auctionStatusDTO.setName(post.getTrangThaiDauGia().getTenTrangThai());
 
-                likePostDTOs.add(likePostDTO);
+                postResponseDTO.setId(post.getMaBaiViet());
+                postResponseDTO.setTitle(post.getTieuDe());
+                postResponseDTO.setContent(post.getNoiDung());
+                List<HinhAnhBaiViet> listImage = this.imgPostService.listHinhAnh(post);
+                List<ImagePostDTO> imagePost = new ArrayList<>();
+                listImage.forEach(img -> {
+                    ImagePostDTO imagePostDTO = new ImagePostDTO();
+                    imagePostDTO.setLink(img.getDuongDanHinh());
+
+                    imagePost.add(imagePostDTO);
+                });
+
+                postResponseDTO.setImagesPost(imagePost);
+                postResponseDTO.setCreateAt(post.getNgayTao());
+                postResponseDTO.setUpdateAt(post.getNgayCapNhat());
+
+                postResponseDTO.setAuctionStatus(auctionStatusDTO);
+                postResponseDTO.setLikePost(likePostDTOs);
+                postResponseDTO.setListComment(listCommentDTOs);
+
+                if (post.getGiaKhoiDiem() != null) {
+                    postResponseDTO.setStartPrice(post.getGiaKhoiDiem());
+                }
+
+                postResponseDTO.setUser(userResponseDTO);
+                postResponseDTOs.add(postResponseDTO);
+                if (post.getThoiGianBatDau() != null) {
+                    postResponseDTO.setEndAuctionTime(F.format(post.getThoiGianBatDau()));
+                }
+
+                if (post.getThoiGianKetThuc() != null) {
+                    postResponseDTO.setStartAuctionTime(F.format(post.getThoiGianKetThuc()));
+                }
+
             });
+            String jsonString = objectMapper.writeValueAsString(postResponseDTOs);
+            redisService.saveToRedis("baiviet", jsonString);
 
-            List<TvBinhLuanBv> listComments = this.commentService.listCommentPost(post);
-            List<CommentResponseDTO> listCommentDTOs = new ArrayList<>();
-            listComments.forEach(cmt -> {
-                CommentResponseDTO commentDTO = new CommentResponseDTO();
-                commentDTO.setId(cmt.getMaBinhLuan());
-                commentDTO.setImage(cmt.getThanhVien().getAnhDaiDien());
-                commentDTO.setUsername(cmt.getThanhVien().getTenDangNhap());
-                commentDTO.setContent(cmt.getNoiDung());
-                commentDTO.setIdUser(cmt.getThanhVien().getMaThanhVien());
-                listCommentDTOs.add(commentDTO);
+            return new ResponseEntity<>(postResponseDTOs, HttpStatus.OK);
+        } else {
+            List<PostResponseDTO> postResponseDTOs = objectMapper.readValue(responseRedis, new TypeReference<List<PostResponseDTO>>() {
             });
-            auctionStatusDTO.setId(post.getTrangThaiDauGia().getMaTrangThaiDauGia());
-            auctionStatusDTO.setName(post.getTrangThaiDauGia().getTenTrangThai());
-
-            postResponseDTO.setId(post.getMaBaiViet());
-            postResponseDTO.setTitle(post.getTieuDe());
-            postResponseDTO.setContent(post.getNoiDung());
-
-//            postResponseDTO.setImage(post.getImage());
-            List<HinhAnhBaiViet> listImage = this.imgPostService.listHinhAnh(post);
-            List<ImagePostDTO> imagePost = new ArrayList<>();
-            listImage.forEach(img -> {
-                ImagePostDTO imagePostDTO = new ImagePostDTO();
-                imagePostDTO.setLink(img.getDuongDanHinh());
-
-                imagePost.add(imagePostDTO);
-            });
-
-            postResponseDTO.setImagesPost(imagePost);
-            postResponseDTO.setCreateAt(post.getNgayTao());
-            postResponseDTO.setUpdateAt(post.getNgayCapNhat());
-
-            postResponseDTO.setAuctionStatus(auctionStatusDTO);
-            postResponseDTO.setLikePost(likePostDTOs);
-            postResponseDTO.setListComment(listCommentDTOs);
-
-            userResponseDTO.setUsername(post.getMaThanhVien().getTenDangNhap());
-            userResponseDTO.setAvatar(post.getMaThanhVien().getAnhDaiDien());
-            userResponseDTO.setId(post.getMaThanhVien().getMaThanhVien());
-            userResponseDTO.setAddress(post.getMaThanhVien().getDiaChi());
-            userResponseDTO.setCreateAt(post.getMaThanhVien().getNgayTao());
-            userResponseDTO.setUpdateAt(post.getMaThanhVien().getNgayCapNhat());
-            userResponseDTO.setDateOfBirth(post.getMaThanhVien().getNgaySinh());
-            userResponseDTO.setEmail(post.getMaThanhVien().getEmail());
-            userResponseDTO.setFirstName(post.getMaThanhVien().getTen());
-            userResponseDTO.setLastName(post.getMaThanhVien().getHo());
-            userResponseDTO.setPhone(post.getMaThanhVien().getSoDienThoai());
-            userResponseDTO.setGender(post.getMaThanhVien().getGioiTinh());
-            if (post.getGiaKhoiDiem() != null) {
-                postResponseDTO.setStartPrice(post.getGiaKhoiDiem());
-            }
-
-            postResponseDTO.setUser(userResponseDTO);
-            postResponseDTOs.add(postResponseDTO);
-            if (post.getThoiGianBatDau() != null) {
-                postResponseDTO.setEndAuctionTime(F.format(post.getThoiGianBatDau()));
-            }
-
-            if (post.getThoiGianKetThuc() != null) {
-                postResponseDTO.setStartAuctionTime(F.format(post.getThoiGianKetThuc()));
-            }
-
-        });
-
-        return new ResponseEntity<>(postResponseDTOs, HttpStatus.OK);
+            return new ResponseEntity<>(postResponseDTOs, HttpStatus.OK);
+        }
 
     }
 
@@ -188,6 +190,7 @@ public class ApiBaiVietController {
         post.setTrangThaiDauGia(auctionStatus);
         boolean isAddedOrUpdated = postService.addOrUpdatePost(post);
         if (isAddedOrUpdated) {
+            redisService.cleanCache();
             return ResponseEntity.status(HttpStatus.CREATED).body("Post added or updated successfully");
         } else {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add or update post");
@@ -196,7 +199,7 @@ public class ApiBaiVietController {
 
     @PutMapping(path = "/post/{id}/", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> updatePost(@RequestBody PostRequestDTO postRequest, Principal user, @PathVariable(value = "id") int id) {
-        
+
         ThanhVien u = this.userService.getUserByUsername(user.getName());
         JMapper<BaiViet, PostRequestDTO> postMapper = new JMapper<>(BaiViet.class, PostRequestDTO.class);
         BaiViet post = this.postService.getPostById(id);
@@ -218,9 +221,10 @@ public class ApiBaiVietController {
             }
             post.setHinhAnhBaiViets(hinhAnhBaiViets);
             TrangThaiDauGia auctionStatus = this.auctionStatusService.getAuctionStatus(postRequest.getAuctionStatus());
-
+            
             post.setTrangThaiDauGia(auctionStatus);
             if (this.postService.addOrUpdatePost(post)) {
+                redisService.cleanCache();
                 return ResponseEntity.status(HttpStatus.OK).body("Post updated successfully");
             } else {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add or update post");
@@ -240,6 +244,7 @@ public class ApiBaiVietController {
 
         if (post.getMaThanhVien().equals(u)) {
             if (this.postService.deletePost(post.getMaBaiViet())) {
+                redisService.cleanCache();
                 return ResponseEntity.status(HttpStatus.OK).body("Post delete successfully");
             } else {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete post");
@@ -251,57 +256,69 @@ public class ApiBaiVietController {
     }
 
     @GetMapping("/post/{id}/")
-    public ResponseEntity<PostResponseDTO> getPost(@PathVariable(value = "id") int id) {
-        BaiViet post = this.postService.getPostById(id);
-        PostResponseDTO postResponseDTO = new PostResponseDTO();
-        UserResponseDTO userResponseDTO = new UserResponseDTO();
-        AuctionStatusDTO auctionStatusDTO = new AuctionStatusDTO();
+    public ResponseEntity<PostResponseDTO> getPost(@PathVariable(value = "id") int id) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String responseRedis = redisService.getFromRedis("baiviet:" + id);
+        if (responseRedis == null) {
+            BaiViet post = this.postService.getPostById(id);
+            PostResponseDTO postResponseDTO = new PostResponseDTO();
 
-        List<TvThichBv> likePosts = this.likeService.getLikePosts(post);
-        List<LikePostDTO> likePostDTOs = new ArrayList<>();
-        likePosts.forEach(likePost -> {
-            LikePostDTO likePostDTO = new LikePostDTO();
-            likePostDTO.setId(likePost.getThanhVien().getMaThanhVien());
-            likePostDTO.setImage(likePost.getThanhVien().getAnhDaiDien());
-            likePostDTO.setUsername(likePost.getThanhVien().getTenDangNhap());
+            UserResponseDTO userResponseDTO = new UserResponseDTO();
+            AuctionStatusDTO auctionStatusDTO = new AuctionStatusDTO();
 
-            likePostDTOs.add(likePostDTO);
-        });
+            List<TvThichBv> likePosts = this.likeService.getLikePosts(post);
+            List<LikePostDTO> likePostDTOs = new ArrayList<>();
+            likePosts.forEach(likePost -> {
+                LikePostDTO likePostDTO = new LikePostDTO();
+                likePostDTO.setId(likePost.getThanhVien().getMaThanhVien());
+                likePostDTO.setImage(likePost.getThanhVien().getAnhDaiDien());
+                likePostDTO.setUsername(likePost.getThanhVien().getTenDangNhap());
 
-        auctionStatusDTO.setId(post.getTrangThaiDauGia().getMaTrangThaiDauGia());
-        auctionStatusDTO.setName(post.getTrangThaiDauGia().getTenTrangThai());
+                likePostDTOs.add(likePostDTO);
+            });
 
-        postResponseDTO.setId(post.getMaBaiViet());
-        postResponseDTO.setTitle(post.getTieuDe());
-        postResponseDTO.setContent(post.getNoiDung());
+            auctionStatusDTO.setId(post.getTrangThaiDauGia().getMaTrangThaiDauGia());
+            auctionStatusDTO.setName(post.getTrangThaiDauGia().getTenTrangThai());
+
+            postResponseDTO.setId(post.getMaBaiViet());
+            postResponseDTO.setTitle(post.getTieuDe());
+            postResponseDTO.setContent(post.getNoiDung());
 //        postResponseDTO.setImage(post.getImage());
-        List<HinhAnhBaiViet> hinhAnhBaiViets = this.imgPostService.listHinhAnh(post);
-        List<ImagePostDTO> imagePostDTOs = new ArrayList<>();
-        hinhAnhBaiViets.forEach(i -> {
-            ImagePostDTO imagePostDTO = new ImagePostDTO();
-            imagePostDTO.setLink(i.getDuongDanHinh());
-            imagePostDTOs.add(imagePostDTO);
-        });
-        postResponseDTO.setImagesPost(imagePostDTOs);
-        postResponseDTO.setCreateAt(post.getNgayTao());
-        postResponseDTO.setUpdateAt(post.getNgayCapNhat());
-        if (post.getThoiGianBatDau() != null) {
-            postResponseDTO.setStartAuctionTime(F.format(post.getThoiGianBatDau()));
-        }
-        if (post.getThoiGianKetThuc() != null) {
-            postResponseDTO.setEndAuctionTime(F.format(post.getThoiGianKetThuc()));
-        }
-        postResponseDTO.setAuctionStatus(auctionStatusDTO);
-        postResponseDTO.setLikePost(likePostDTOs);
-        userResponseDTO.setUsername(post.getMaThanhVien().getTenDangNhap());
-        userResponseDTO.setAvatar(post.getMaThanhVien().getAnhDaiDien());
+            List<HinhAnhBaiViet> hinhAnhBaiViets = this.imgPostService.listHinhAnh(post);
+            List<ImagePostDTO> imagePostDTOs = new ArrayList<>();
+            hinhAnhBaiViets.forEach(i -> {
+                ImagePostDTO imagePostDTO = new ImagePostDTO();
+                imagePostDTO.setLink(i.getDuongDanHinh());
+                imagePostDTOs.add(imagePostDTO);
+            });
+            postResponseDTO.setImagesPost(imagePostDTOs);
+            postResponseDTO.setCreateAt(post.getNgayTao());
+            postResponseDTO.setUpdateAt(post.getNgayCapNhat());
+            if (post.getThoiGianBatDau() != null) {
+                postResponseDTO.setStartAuctionTime(F.format(post.getThoiGianBatDau()));
+            }
+            if (post.getThoiGianKetThuc() != null) {
+                postResponseDTO.setEndAuctionTime(F.format(post.getThoiGianKetThuc()));
+            }
+            postResponseDTO.setAuctionStatus(auctionStatusDTO);
+            postResponseDTO.setLikePost(likePostDTOs);
+            userResponseDTO.setUsername(post.getMaThanhVien().getTenDangNhap());
+            userResponseDTO.setAvatar(post.getMaThanhVien().getAnhDaiDien());
 
-        postResponseDTO.setUser(userResponseDTO);
-        if (post.getGiaKhoiDiem() != null) {
-            postResponseDTO.setStartPrice(post.getGiaKhoiDiem());
+            postResponseDTO.setUser(userResponseDTO);
+            if (post.getGiaKhoiDiem() != null) {
+                postResponseDTO.setStartPrice(post.getGiaKhoiDiem());
+            }
+
+            String jsonString = objectMapper.writeValueAsString(postResponseDTO);
+            redisService.saveToRedis("baiviet:" + id, jsonString);
+            return new ResponseEntity<>(postResponseDTO, HttpStatus.OK);
+        } else {
+            // Chuyển đổi chuỗi JSON thành đối tượng PostResponseDTO
+            PostResponseDTO postResponseDTO = objectMapper.readValue(responseRedis, PostResponseDTO.class);
+            return new ResponseEntity<>(postResponseDTO, HttpStatus.OK);
         }
 
-        return new ResponseEntity<>(postResponseDTO, HttpStatus.OK);
     }
 
     @GetMapping("/post/count-pages/")

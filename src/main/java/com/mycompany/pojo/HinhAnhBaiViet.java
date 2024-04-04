@@ -4,6 +4,7 @@
  */
 package com.mycompany.pojo;
 
+import com.googlecode.jmapper.annotations.JMap;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
@@ -53,6 +54,7 @@ public class HinhAnhBaiViet implements Serializable {
     private Integer maHinhBaiViet;
     @Size(max = 200)
     @Column(name = "DuongDanHinh")
+    @JMap("link")
     private String duongDanHinh;
     @Column(name = "NgayTao")
     @Temporal(TemporalType.TIMESTAMP)

@@ -4,6 +4,7 @@
  */
 package com.mycompany.DTO;
 
+import com.googlecode.jmapper.annotations.JMap;
 import java.util.Date;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -25,7 +26,6 @@ public class PostResponseDTO {
     private int id;
     private String title;
     private String content;
-    private String image;
     private double startPrice;
     private String startAuctionTime;
     private String endAuctionTime;

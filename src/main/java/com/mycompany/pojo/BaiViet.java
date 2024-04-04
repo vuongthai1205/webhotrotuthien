@@ -45,15 +45,15 @@ import org.springframework.web.multipart.MultipartFile;
 @NamedQueries({
     @NamedQuery(name = "BaiViet.findAll", query = "SELECT b FROM BaiViet b")})
 public class BaiViet implements Serializable {
-    
+
     @PrePersist
-    protected void onCreate(){
-        this.ngayTao=new Date(System.currentTimeMillis());
+    protected void onCreate() {
+        this.ngayTao = new Date(System.currentTimeMillis());
     }
 
     @PreUpdate
-    protected void onUpdate(){
-        this.ngayCapNhat=new Date(System.currentTimeMillis());
+    protected void onUpdate() {
+        this.ngayCapNhat = new Date(System.currentTimeMillis());
     }
 
     private static final long serialVersionUID = 1L;
@@ -93,10 +93,10 @@ public class BaiViet implements Serializable {
     @Column(name = "NgayCapNhat")
     @Temporal(TemporalType.TIMESTAMP)
     private Date ngayCapNhat;
-    
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "baiViet", fetch = FetchType.EAGER)
     private List<HinhAnhBaiViet> hinhAnhBaiViets;
-    
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "baiViet")
     private Set<DauGia> dauGiaSet;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "baiViet")
@@ -107,7 +107,7 @@ public class BaiViet implements Serializable {
     @JoinColumn(name = "TrangThaiDauGia", referencedColumnName = "MaTrangThaiDauGia")
     @ManyToOne
     private TrangThaiDauGia trangThaiDauGia;
-    
+
     @Transient
     @JsonIgnore
     private MultipartFile[] file;
@@ -172,7 +172,6 @@ public class BaiViet implements Serializable {
     public void setThoiGianKetThuc(Date thoiGianKetThuc) {
         this.thoiGianKetThuc = thoiGianKetThuc;
     }
-
 
     public Date getNgayTao() {
         return ngayTao;
@@ -268,5 +267,5 @@ public class BaiViet implements Serializable {
     public void setFile(MultipartFile[] file) {
         this.file = file;
     }
-    
+
 }

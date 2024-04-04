@@ -16,9 +16,11 @@ import com.mycompany.service.BaiVietService;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -47,8 +49,9 @@ public class BaiVietServiceImpl implements BaiVietService {
     }
 
     @Override
+    @Cacheable("baiviet")
     public BaiViet getPostById(int id) {
-        return this.baiVietRepository.getPostById(id);
+        return baiVietRepository.getPostById(id);
     }
 
     @Override

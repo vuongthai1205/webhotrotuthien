@@ -5,6 +5,7 @@
 package com.mycompany.pojo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.googlecode.jmapper.annotations.JMap;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -67,11 +68,13 @@ public class ThanhVien implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "MaThanhVien")
+    @JMap("id")
     private Integer maThanhVien;
     @Basic(optional = false)
     @NotNull
     @Size(min = 1, max = 45, message = "{user.username.notNullMsg}")
     @Column(name = "TenDangNhap", unique = true)
+    @JMap("username")
     private String tenDangNhap;
     @Basic(optional = false)
     @NotNull
@@ -80,35 +83,45 @@ public class ThanhVien implements UserDetails {
     private String matKhau;
     @Size(max = 12)
     @Column(name = "SoDienThoai")
+    @JMap("phone")
     private String soDienThoai;
     @Pattern(regexp="[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", message="Invalid email")//if the field contains email address consider using this annotation to enforce field validation
     @Size(max = 45)
     @Column(name = "email")
+    @JMap("email")
     private String email;
     @Size(max = 45)
     @Column(name = "Ho")
+    @JMap("lastName")
     private String ho;
     @Size(max = 45)
     @Column(name = "Ten")
+    @JMap("firstName")
     private String ten;
     @Column(name = "Tuoi")
     private Integer tuoi;
     @Column(name = "GioiTinh")
+    @JMap("gender")
     private Short gioiTinh;
     @Column(name = "NgaySinh")
     @Temporal(TemporalType.TIMESTAMP)
+    @JMap("dateOfBirth")
     private Date ngaySinh;
     @Size(max = 100)
     @Column(name = "DiaChi")
+    @JMap("address")
     private String diaChi;
     @Size(max = 200)
     @Column(name = "AnhDaiDien")
+    @JMap("avatar")
     private String anhDaiDien;
     @Column(name = "NgayTao")
     @Temporal(TemporalType.TIMESTAMP)
+    @JMap("createAt")
     private Date ngayTao;
     @Column(name = "NgayCapNhat")
     @Temporal(TemporalType.TIMESTAMP)
+    @JMap("updateAt")
     private Date ngayCapNhat;
     @JoinTable(name = "quyen_cua_thanh_vien", joinColumns = {
         @JoinColumn(name = "MaThanhVien")}, inverseJoinColumns = {
